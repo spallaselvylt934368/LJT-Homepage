@@ -1,0 +1,11 @@
+{% assign sorted_publications = site.publications | sort: "year" | reverse %}
+<ul class="publications-list">
+{% for pub in sorted_publications %}
+  <li>
+    <strong>{{ pub.title }}</strong><br>
+    {{ pub.authors | replace: "Junteng Liu", "<strong>Junteng Liu</strong>" }}<br>
+    <em>{{ pub.venue }}</em>, {{ pub.year }}{% if pub.first_author %} (first author){% endif %}
+    {% if pub.code %}<br>GitHub code repository: <code>{{ pub.code }}</code>{% endif %}
+  </li>
+{% endfor %}
+</ul>
