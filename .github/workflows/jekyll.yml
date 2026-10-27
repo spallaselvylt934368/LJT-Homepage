@@ -24,6 +24,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    outputs:
+      pages_base_path: ${{ steps.pages.outputs.base_path }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
@@ -47,6 +49,7 @@ jobs:
         uses: actions/configure-pages@v6.0.0
         with:
           enablement: true
+        continue-on-error: true
       - name: Build with Jekyll
         run: bundle exec jekyll build
         env:
@@ -55,11 +58,20 @@ jobs:
         run: |
           test -f _site/index.html
           test -f _site/publications/index.html
+          for page in _site/index.html _site/publications/index.html; do
+            grep -q "SynLogic:" "$page"
+            grep -q "On the Perception Bottleneck of VLMs for Chart Understanding" "$page"
+            grep -q "On the Universal Truthfulness Hyperplane Inside LLMs" "$page"
+            grep -q "In-Context Sharpness as Alerts:" "$page"
+            grep -q "C-Eval:" "$page"
+            grep -q "Composing Parameter-Efficient Modules with Arithmetic Operations" "$page"
+          done
           find _site -maxdepth 2 -type f | sort
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5.0.0
 
   deploy:
+    if: needs.build.outputs.pages_base_path != ''
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
